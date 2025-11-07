@@ -1,0 +1,54 @@
+name: Build and publish container
+
+on:
+  push:
+    branches: ['*']
+    tags: ['*']
+
+permissions:
+  packages: write
+  contents: read
+
+env:
+  distributions: '42 43'
+  target_name: 'fedora-$dist-obs-devel'
+
+jobs:
+  docker_build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: docker login
+        run: |
+          set -e
+          docker login ghcr.io -u ${{ github.actor }} --password-stdin <<< '${{ github.token }}'
+
+      - name: Build
+        run: |
+          set -e
+
+          if test '${{ github.event_name }}' = 'pull_request'; then
+            target_repository='ghcr.io/${{ github.repository_owner }}/'
+            target_version=":$(git describe --tags --always | sed -e 's;.*/;;')"
+          elif test '${{ github.ref_name }}' = 'docker-build'; then
+            target_repository='ghcr.io/${{ github.repository_owner }}/'
+            target_version=':latest'
+          else
+            target_repository=''
+            target_version=':latest'
+          fi
+
+          for dist in ${{ env.distributions }}; do
+            target="${target_repository}${{ env.target_name }}${target_version}"
+
+            d=fedora-${dist}.d
+            mkdir $d
+            sed \
+              -e "s/%dist%/$dist/g" \
+              -e "s/%UID%/$UID/g" \
+              < docker-fedora-template/Dockerfile > $d/Dockerfile
+            docker build -t "$target" $d
+            docker push "$target"
+          done
