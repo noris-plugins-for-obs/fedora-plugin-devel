@@ -16,6 +16,12 @@ env:
 jobs:
   docker_build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dist:
+          - 41
+          - 42
+          - 43
 
     steps:
       - uses: actions/checkout@v4
@@ -29,6 +35,8 @@ jobs:
         run: |
           set -e
 
+          dist='${{ matrix.dist }}'
+
           if test '${{ github.event_name }}' = 'pull_request'; then
             target_repository='ghcr.io/${{ github.repository_owner }}/'
             target_version=":$(git describe --tags --always | sed -e 's;.*/;;')"
@@ -40,15 +48,13 @@ jobs:
             target_version=':latest'
           fi
 
-          for dist in ${{ env.distributions }}; do
-            target="${target_repository}${{ env.target_name }}${target_version}"
+          target="${target_repository}${{ env.target_name }}${target_version}"
 
-            d=fedora-${dist}.d
-            mkdir $d
-            sed \
-              -e "s/%dist%/$dist/g" \
-              -e "s/%UID%/$UID/g" \
-              < docker-fedora-template/Dockerfile > $d/Dockerfile
-            docker build -t "$target" $d
-            docker push "$target"
-          done
+          d=fedora-${dist}.d
+          mkdir $d
+          sed \
+            -e "s/%dist%/$dist/g" \
+            -e "s/%UID%/$UID/g" \
+            < docker-fedora-template/Dockerfile > $d/Dockerfile
+          docker build -t "$target" $d
+          docker push "$target"
