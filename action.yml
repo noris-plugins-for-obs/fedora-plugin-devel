@@ -1,0 +1,37 @@
+name: 'Action to build obs-studio plugin for Fedora'
+description: 'Run rpm-build flow'
+inputs:
+  spec:
+    description: 'Path to the spec file'
+    required: true
+    type: string
+  dists:
+    description: 'The distribution codes (42, 43, etc.)'
+    required: false
+    default: all
+    type: string
+
+runs:
+  using: 'composite'
+  steps:
+    - name: rpm-build
+      shell: bash
+      run: |
+        set -e
+        dists_opts=($(
+          sed \
+            -e 's/all/42 43/' \
+            -e 's;\(\S\+\);--docker-image ghcr.io/noris-plugins-for-obs/fedora-\1-obs-devel:latest;g' \
+            <<< '${{ inputs.dists }}'
+        ))
+
+        spec_dir="$(dirname ${{ inputs.spec }})"
+        patches_opts=($(
+          find $spec_dir/ -name '*.patch' |
+          sed -e 's;\(.*\);--patch \1;'
+        ))
+
+        python3 '${{ github.action_path }}'/'make.py' \
+          "${dists_opts[@]}" \
+          "${patches_opts[@]}" \
+          --spec ${{ inputs.spec }}
