@@ -14,7 +14,7 @@ _DOCKER_HOME = '/home/user'
 _PACKAGER_NAME = 'Norihiro Kamae <fedora-obs-studio-plugins@nagater.net>'
 
 def _default_version():
-    res = subprocess.run(['git', 'describe', '--abbrev=0'], capture_output=True, check=True)
+    res = subprocess.run(['git', 'describe', '--abbrev=0', '--tags'], capture_output=True, check=True)
     return res.stdout.decode('ascii').strip().strip()
 
 def _prepare_rpmbuild(args):
