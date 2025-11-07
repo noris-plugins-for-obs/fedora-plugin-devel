@@ -8,7 +8,12 @@ inputs:
   dists:
     description: 'The distribution codes (42, 43, etc.)'
     required: false
-    default: all
+    default: '42 43'
+    type: string
+  version:
+    description: 'version of the package'
+    required: false
+    default: ''
     type: string
   rpmbuild_dir:
     description: 'rpmbuild directory that the script will work on'
@@ -25,7 +30,6 @@ runs:
         set -e
         dists_opts=($(
           sed \
-            -e 's/all/42 43/' \
             -e 's;\(\S\+\);--docker-image ghcr.io/noris-plugins-for-obs/fedora-\1-obs-devel:latest;g' \
             <<< '${{ inputs.dists }}'
         ))
@@ -35,9 +39,15 @@ runs:
           find $spec_dir/ -name '*.patch' |
           sed -e 's;\(.*\);--patch \1;'
         ))
+        if test -n '${{ inputs.version }}'; then
+          ver_opt=(--version '${{ inputs.version }}')
+        else
+          ver_opt=()
+        fi
 
         python3 '${{ github.action_path }}'/'make.py' \
           "${dists_opts[@]}" \
           "${patches_opts[@]}" \
           --spec ${{ inputs.spec }} \
-          --rpmbuild ${{ inputs.rpmbuild_dir }}
+          --rpmbuild ${{ inputs.rpmbuild_dir }} \
+          "${ver_opt[@]}"
