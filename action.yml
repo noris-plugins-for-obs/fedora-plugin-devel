@@ -10,6 +10,11 @@ inputs:
     required: false
     default: all
     type: string
+  rpmbuild_dir:
+    description: 'rpmbuild directory that the script will work on'
+    required: false
+    default: ./rpmbuild
+    type: string
 
 runs:
   using: 'composite'
@@ -34,4 +39,5 @@ runs:
         python3 '${{ github.action_path }}'/'make.py' \
           "${dists_opts[@]}" \
           "${patches_opts[@]}" \
-          --spec ${{ inputs.spec }}
+          --spec ${{ inputs.spec }} \
+          --rpmbuild ${{ inputs.rpmbuild_dir }}
