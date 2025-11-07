@@ -66,7 +66,7 @@ def _prepare_sources(args):
     ga = subprocess.run([
         'git', 'archive',
         '--format=tar', f'--prefix={args.name}-{args.version}/',
-        args.version
+        'HEAD'
         ], capture_output=True, check=True)
     tar_bz2 = bz2.compress(ga.stdout)
     with open(f'{args.rpmbuild}/SOURCES/{args.name}-{args.version}.tar.bz2', 'wb') as fw:
