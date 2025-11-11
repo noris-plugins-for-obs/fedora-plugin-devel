@@ -39,14 +39,14 @@ jobs:
           dist='${{ matrix.dist }}'
 
           if test '${{ github.event_name }}' = 'pull_request'; then
-            target_repository='ghcr.io/${{ github.repository_owner }}/'
-            target_version=":$(git describe --tags --always | sed -e 's;.*/;;')"
+            target_repository=''
+            target_version=':latest'
           elif test '${{ github.ref_name }}' = 'docker-build'; then
             target_repository='ghcr.io/${{ github.repository_owner }}/'
             target_version=':latest'
           else
-            target_repository=''
-            target_version=':latest'
+            target_repository='ghcr.io/${{ github.repository_owner }}/'
+            target_version=":$(git describe --tags --always | sed -e 's;.*/;;')"
           fi
 
           target="${target_repository}${{ env.target_name }}${target_version}"
