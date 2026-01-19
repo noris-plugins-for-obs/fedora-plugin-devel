@@ -1,0 +1,22 @@
+name: 'Setup obs-studio plugin build flow for Fedora'
+description: 'Return available Fedora releases'
+outputs:
+  matrix:
+    description: "Matrix for the build flow"
+    value: ${{ steps.setup.outputs.matrix }}
+
+runs:
+  using: 'composite'
+  steps:
+    - id: setup
+      shell: bash
+      run: |
+        jq -c > matrix.json <<-EOF
+        {
+          "include": [
+            { "fedora": 42 },
+            { "fedora": 43 }
+          ]
+        }
+        EOF
+        echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
