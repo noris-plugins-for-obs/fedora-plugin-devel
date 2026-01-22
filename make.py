@@ -67,7 +67,7 @@ def _prepare_sources(args):
     ga = subprocess.run([
         'git', 'archive',
         '--format=tar', f'--prefix={args.name}-{args.version}/',
-        'HEAD'
+        args.commit
         ], capture_output=True, check=True)
     tar_bz2 = bz2.compress(ga.stdout)
     with open(f'{args.rpmbuild}/SOURCES/{args.name}-{args.version}.tar.bz2', 'wb') as fw:
@@ -116,6 +116,7 @@ def _get_args():
     parser.add_argument('--native', action='store_true', default=False)
     parser.add_argument('--rpmbuild', action='store', default=None)
     parser.add_argument('--version', action='store', default=None)
+    parser.add_argument('--commit', action='store', default=None)
     parser.add_argument('--release', action='store', type=str, default='1')
     parser.add_argument('--message', action='store', type=str, default=None)
     parser.add_argument('--old-rpm', action='store', type=str, default=None)
@@ -124,6 +125,9 @@ def _get_args():
 
     if not args.version:
         args.version = _default_version()
+
+    if not args.commit:
+        args.commit = args.version
 
     return args
 

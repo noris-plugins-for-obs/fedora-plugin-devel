@@ -15,6 +15,11 @@ inputs:
     required: false
     default: ''
     type: string
+  commit:
+    description: 'commit of the source code'
+    required: false
+    default: 'HEAD'
+    type: string
   rpmbuild_dir:
     description: 'rpmbuild directory that the script will work on'
     required: false
@@ -50,4 +55,5 @@ runs:
           "${patches_opts[@]}" \
           --spec ${{ inputs.spec }} \
           --rpmbuild ${{ inputs.rpmbuild_dir }} \
-          "${ver_opt[@]}"
+          "${ver_opt[@]}" \
+          --commit '${{ inputs.commit }}'
