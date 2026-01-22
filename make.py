@@ -15,7 +15,8 @@ _DOCKER_HOME = '/home/user'
 _PACKAGER_NAME = 'Norihiro Kamae <fedora-obs-studio-plugins@nagater.net>'
 
 def _default_version():
-    res = subprocess.run(['git', 'describe', '--abbrev=0', '--tags'], capture_output=True, check=True)
+    res = subprocess.run(['git', 'describe', '--abbrev=0', '--tags'],
+                         capture_output=True, check=True)
     return res.stdout.decode('ascii').strip().strip()
 
 def _prepare_rpmbuild(args):
@@ -59,7 +60,6 @@ def _prepare_spec_file(args):
     with open(f'{args.rpmbuild}/SPECS/{args.name}.spec', 'w', encoding='ascii') as fw:
         fw.write(spec)
 
-    # TODO: Automatically retreive patch files from the spec file
     for patch in args.patch:
         shutil.copy2(patch, f'{args.rpmbuild}/SOURCES')
 
