@@ -6,6 +6,7 @@ import bz2
 import os.path
 import subprocess
 import shutil
+import sys
 import tempfile
 import textwrap
 import datetime
@@ -92,7 +93,11 @@ def _build_on_docker(image, args):
                 image,
                 run_sh
         ]
-        subprocess.run(cmd, check=True)
+        try:
+            subprocess.run(cmd, check=True)
+        except subprocess.CalledProcessError as e:
+            sys.stderr.write(f'Error: {e}\n')
+            sys.exit(e.returncode)
 
 def _build_on_native(args):
     rpmbuild_abs = os.path.abspath(args.rpmbuild)
@@ -131,7 +136,11 @@ def main():
         _build_on_docker(image=image, args=args)
 
     if args.native:
-        _build_on_native(args=args)
+        try:
+            _build_on_native(args=args)
+        except subprocess.CalledProcessError as e:
+            sys.stderr.write(f'Error: {e}\n')
+            sys.exit(e.returncode)
 
 if __name__ == '__main__':
     main()
