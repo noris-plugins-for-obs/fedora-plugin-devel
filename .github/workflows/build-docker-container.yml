@@ -10,7 +10,6 @@ permissions:
   contents: read
 
 env:
-  distributions: '42 43'
   target_name: 'fedora-$dist-obs-devel'
 
 jobs:
