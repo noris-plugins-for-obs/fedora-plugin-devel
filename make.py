@@ -124,7 +124,7 @@ def _build_on_native(args):
 def _get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--spec', action='store', default=None)
-    parser.add_argument('--patch', action='append', default=[], deprecated=True)
+    parser.add_argument('--patch', action='append', default=[])
     parser.add_argument('--docker-image', action='append', default=[])
     parser.add_argument('--native', action='store_true', default=False)
     parser.add_argument('--rpmbuild', action='store', default=None)
