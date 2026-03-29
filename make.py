@@ -4,6 +4,7 @@
 import argparse
 import bz2
 import os.path
+import re
 import subprocess
 import shutil
 import sys
@@ -31,12 +32,22 @@ def _prepare_spec_file(args):
     with open(args.spec, 'r', encoding='ascii') as fr:
         spec = fr.read()
 
+    spec_dir = os.path.dirname(args.spec)
+
     spec = spec.replace('@VERSION@', args.version)
     spec = spec.replace('@RELEASE@', args.release)
+
+    re_patch = re.compile(r'Patch[0-9]*: *(\S*)')
+    patches = []
 
     for line in spec.split('\n'):
         if line[0:5] == 'Name:':
             args.name = line.split()[1]
+
+        m = re_patch.match(line)
+        if m:
+            p = m[1]
+            patches.append(spec_dir + '/' + p)
 
     if args.message:
         msg = args.message
@@ -60,7 +71,9 @@ def _prepare_spec_file(args):
     with open(f'{args.rpmbuild}/SPECS/{args.name}.spec', 'w', encoding='ascii') as fw:
         fw.write(spec)
 
-    for patch in args.patch:
+    if args.patch:
+        patches = args.patch
+    for patch in patches:
         shutil.copy2(patch, f'{args.rpmbuild}/SOURCES')
 
 def _prepare_sources(args):
@@ -111,7 +124,7 @@ def _build_on_native(args):
 def _get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--spec', action='store', default=None)
-    parser.add_argument('--patch', action='append', default=[])
+    parser.add_argument('--patch', action='append', default=[], deprecated=True)
     parser.add_argument('--docker-image', action='append', default=[])
     parser.add_argument('--native', action='store_true', default=False)
     parser.add_argument('--rpmbuild', action='store', default=None)
