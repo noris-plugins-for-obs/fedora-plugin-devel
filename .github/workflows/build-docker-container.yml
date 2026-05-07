@@ -18,9 +18,9 @@ jobs:
     strategy:
       matrix:
         dist:
-          - 42
           - 43
           - 44
+          - 45
 
     steps:
       - uses: actions/checkout@v6
